@@ -1,0 +1,119 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>NYC Bike Share Flows</title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <style>
+            #chord {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background-color: rgba(26, 31, 53, 0.0);
+            }
+            .tooltip {
+                position: absolute;
+                background-color: rgba(26, 31, 53, 0.9);
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                font-size: 12px;
+                pointer-events: none;
+            }
+        </style>
+    </head>
+    <body style="margin:0; background-color: transparent;">
+        <div id="chord"></div>
+        <script>
+            const width = 800;
+            const height = 800;
+            const names = ["Amsterdam Ave and W ", "Central Park West an", "Lexington Ave and E ", "University Pl and E ", "W 21 St and 6 Ave", "Adam Clayton Powell ", "Metropolitan Ave and", "Frederick Douglass B", "Central Park W and W", "8 Ave and W 31 St", "West St and Chambers", "Broadway and W 58 St", "Lafayette St and E 8", "W 31 St and 7 Ave", "Broadway and E 14 St"];
+            const matrix = [[38721, 6504, 1248, 344, 294, 4533, 28, 5156, 4776, 536, 722, 3224, 209, 390, 176], [6910, 31227, 750, 242, 193, 1586, 30, 3884, 10684, 250, 351, 4364, 124, 424, 148], [1101, 791, 8805, 1874, 1981, 2455, 111, 1439, 337, 2091, 384, 718, 1109, 3789, 1847], [330, 282, 1796, 7107, 1958, 75, 161, 58, 85, 1076, 658, 187, 1744, 717, 3848], [396, 283, 1423, 1448, 1375, 70, 54, 76, 189, 1442, 678, 228, 665, 1479, 801], [4178, 1466, 2142, 81, 24, 24582, 5, 10063, 1790, 34, 40, 493, 53, 121, 55], [31, 26, 86, 111, 99, 9, 6099, 4, 20, 82, 53, 16, 87, 16, 81], [4784, 2623, 1596, 74, 20, 10209, 2, 16472, 3412, 65, 53, 691, 48, 100, 49], [4612, 8772, 461, 101, 110, 2110, 21, 4225, 10613, 77, 107, 2229, 64, 209, 53], [1076, 783, 1715, 752, 812, 143, 31, 155, 211, 1252, 527, 1092, 313, 294, 403], [545, 266, 338, 789, 831, 22, 42, 52, 47, 517, 3859, 169, 427, 62, 192], [3103, 4607, 766, 248, 252, 396, 24, 657, 1739, 319, 276, 6165, 115, 637, 148], [213, 154, 1470, 1635, 1321, 52, 93, 46, 51, 543, 496, 134, 1253, 473, 2022], [413, 401, 3575, 1112, 1545, 112, 43, 96, 165, 578, 249, 283, 449, 945, 528], [142, 126, 1334, 1838, 1045, 56, 122, 37, 44, 480, 185, 74, 2220, 469, 1116]];
+            const colors = ["#e52d2d", "#e5772d", "#e5c02d", "#c0e52d", "#77e52d", "#2de52d", "#2de577", "#2de5c0", "#2dc0e5", "#2d77e5", "#2d2de5", "#772de5", "#c02de5", "#e52dc0", "#e52d77"];
+
+            // Create the chord diagram
+            const svg = d3.select("#chord")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", `translate(${width/2},${height/2})`);
+
+            // Create a tooltip
+            const tooltip = d3.select("body")
+                .append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+
+            // Create the chord layout
+            const chord = d3.chordDirected()
+                .padAngle(0.05)
+                .sortSubgroups(d3.descending)
+                (matrix);
+
+            // Add the groups
+            const group = svg.append("g")
+                .selectAll("g")
+                .data(chord.groups)
+                .join("g");
+
+            // Add the outer arcs
+            group.append("path")
+                .attr("fill", d => colors[d.index])
+                .attr("d", d3.arc()
+                    .innerRadius(300)
+                    .outerRadius(310)
+                )
+                .on("mouseover", function(event, d) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html(names[d.index])
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function(d) {
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
+
+            // Add the chords
+            svg.append("g")
+                .attr("fill-opacity", 0.75)
+                .selectAll("path")
+                .data(chord)
+                .join("path")
+                .attr("d", d3.ribbon()
+                    .radius(300)
+                )
+                .attr("fill", d => colors[d.source.index])
+                .attr("stroke", "none")
+                .on("mouseover", function(event, d) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html(`${names[d.source.index]} → ${names[d.target.index]}<br/>Rides: ${d.source.value.toLocaleString()}`)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function(d) {
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
+
+            // Add title
+            svg.append("text")
+                .attr("x", 0)
+                .attr("y", -height/2 + 40)
+                .attr("text-anchor", "middle")
+                .style("font-size", "24px")
+                .style("fill", "#00fff2")
+                .text("Top 15 Station Connections");
+        </script>
+    </body>
+    </html>
+    

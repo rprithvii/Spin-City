@@ -1,0 +1,154 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <title>NYC Bike Share Flows</title>
+        <script src="https://d3js.org/d3.v7.min.js"></script>
+        <style>
+            .container {
+                width: 800px;
+                height: 500px;
+                background-color: rgba(26, 31, 53, 0.0);
+            }
+            #chord {
+                width: 800px;
+                height: 500px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .tooltip {
+                position: absolute;
+                background-color: rgba(26, 31, 53, 0.9);
+                color: white;
+                padding: 10px;
+                border-radius: 5px;
+                font-size: 12px;
+                pointer-events: none;
+            }
+            .station-label {
+                font-family: Arial, sans-serif;
+                font-weight: 500;
+            }
+        </style>
+    </head>
+    <body style="margin:0; background-color: transparent;">
+        <div class="container">
+            <div id="chord"></div>
+        </div>
+        <script>
+            const width = 800;
+            const height = 500;
+            const radius = Math.min(width, height) * 0.4;  // Increased radius
+            const names = ["W 21 St and 6 Ave", "8 Ave and W 31 St", "University Pl and E 14 St", "West St and Chambers St", "Broadway and W 58 St", "Lafayette St and E 8 St", "W 31 St and 7 Ave", "Broadway and E 14 St", "11 Ave and W 41 St", "Broadway and W 25 St", "9 Ave and W 33 St", "E 33 St and 1 Ave", "W 30 St and 10 Ave", "Broadway and E 21 St", "6 Ave and W 33 St"];
+            const matrix = [[1375, 1442, 1114, 678, 228, 665, 1479, 801, 1537, 802, 1137, 328, 1661, 770, 2083], [812, 1252, 515, 527, 1092, 313, 294, 403, 2338, 1163, 1181, 1049, 1749, 599, 581], [1465, 768, 1682, 458, 154, 1056, 498, 2750, 336, 986, 229, 345, 461, 1329, 640], [831, 517, 507, 3859, 169, 427, 62, 192, 1058, 238, 228, 93, 1928, 364, 189], [252, 319, 175, 276, 6165, 115, 637, 148, 811, 594, 794, 247, 408, 263, 469], [1321, 543, 1192, 496, 134, 1253, 473, 2022, 227, 663, 341, 466, 424, 1025, 660], [1545, 578, 730, 249, 283, 449, 945, 528, 541, 1728, 470, 2853, 965, 1168, 2938], [1045, 480, 630, 185, 74, 2220, 469, 1116, 195, 589, 212, 342, 204, 1090, 444], [876, 1930, 428, 832, 672, 227, 437, 187, 2193, 632, 3710, 218, 1500, 355, 520], [866, 855, 1529, 306, 234, 861, 1762, 1062, 494, 1556, 425, 432, 809, 849, 1347], [1402, 463, 453, 481, 417, 447, 307, 317, 1984, 993, 1029, 211, 788, 696, 871], [608, 772, 462, 101, 341, 429, 4204, 471, 217, 756, 305, 1358, 448, 619, 3140], [1031, 2720, 399, 1480, 484, 397, 589, 171, 915, 1112, 720, 232, 2027, 601, 1457], [1666, 914, 2094, 418, 148, 938, 1164, 1538, 276, 756, 502, 409, 615, 1224, 861], [602, 741, 472, 158, 489, 255, 729, 411, 1170, 1066, 1101, 3594, 1019, 596, 1020]];
+            const colors = ["#e52d2d", "#e5772d", "#e5c02d", "#c0e52d", "#77e52d", "#2de52d", "#2de577", "#2de5c0", "#2dc0e5", "#2d77e5", "#2d2de5", "#772de5", "#c02de5", "#e52dc0", "#e52d77"];
+
+            // Create the chord diagram
+            const svg = d3.select("#chord")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", `translate(${width/2},${height/2})`);
+
+            // Create a tooltip
+            const tooltip = d3.select("body")
+                .append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0);
+
+            // Create the chord layout
+            const chord = d3.chordDirected()
+                .padAngle(0.07)  // Increased pad angle for better separation
+                .sortSubgroups(d3.descending)
+                (matrix);
+
+            // Add the groups
+            const group = svg.append("g")
+                .selectAll("g")
+                .data(chord.groups)
+                .join("g");
+
+            // Add the outer arcs
+            group.append("path")
+                .attr("fill", d => colors[d.index])
+                .attr("d", d3.arc()
+                    .innerRadius(radius)
+                    .outerRadius(radius + 12)  // Increased arc thickness
+                );
+
+            // Add station names
+            group.append("text")
+                .each(d => {
+                    d.angle = (d.startAngle + d.endAngle) / 2;
+                    d.name = names[d.index];
+                })
+                .attr("dy", ".35em")
+                .attr("class", "station-label")
+                .attr("transform", d => {
+                    const rotation = (d.angle * 180 / Math.PI - 90);
+                    const translation = radius + 30;  // Increased distance for labels
+                    return `
+                        rotate(${rotation})
+                        translate(${translation})
+                        ${d.angle > Math.PI ? "rotate(180)" : ""}
+                    `;
+                })
+                .attr("text-anchor", d => d.angle > Math.PI ? "end" : "start")
+                .text(d => d.name)
+                .style("font-size", "12px")  // Slightly larger font
+                .style("fill", "white")
+                .style("font-weight", "bold");
+
+            // Add the chords
+            svg.append("g")
+                .attr("fill-opacity", 0.8)  // Increased opacity
+                .selectAll("path")
+                .data(chord)
+                .join("path")
+                .attr("d", d3.ribbon()
+                    .radius(radius)
+                )
+                .attr("fill", d => colors[d.source.index])
+                .attr("stroke", "none")
+                .on("mouseover", function(event, d) {
+                    d3.selectAll(".station-label")
+                        .style("font-size", text => {
+                            if (text.index === d.source.index || text.index === d.target.index) {
+                                return "14px";  // Larger highlight font
+                            }
+                            return "12px";
+                        })
+                        .style("fill", text => {
+                            if (text.index === d.source.index || text.index === d.target.index) {
+                                return "#00fff2";
+                            }
+                            return "white";
+                        });
+                    
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html(`
+                        <b>From:</b> ${names[d.source.index]}<br/>
+                        <b>To:</b> ${names[d.target.index]}<br/>
+                        <b>Rides:</b> ${d.source.value.toLocaleString()}
+                    `)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function(d) {
+                    d3.selectAll(".station-label")
+                        .style("font-size", "12px")
+                        .style("fill", "white");
+                    
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
+        </script>
+    </body>
+    </html>
+    
