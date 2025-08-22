@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NYC Citi Bike Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="https://cdn.lordicon.com/bhenfmcm.js"></script>
+
+<style>
+:root{
+--brand:#0072CE;
+--accent:#9BE564;
+--text:#0f1222;
+--gradient: linear-gradient(120deg, #0072CE, #005bb7);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding: 2rem;
+}
+
+*{box-sizing:border-box;}
+body{margin:0;font-family:Poppins, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;color:var(--text);background:#0b1020;}
+
+.hero{
+  position:relative; height:100vh; min-height:420px; display:grid; place-items:center; text-align:center;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.65), rgba(0,0,0,.80)),
+    url('assets/hero.jpg') center/cover no-repeat fixed,
+    radial-gradient(1200px 600px at 50% 0%, #1c2a6a, #0b1020);
+  color:#fff;
+  overflow: hidden;
+}
+
+.parallax-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.parallax-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: opacity 0.8s ease-in-out;
+  filter: brightness(0.8); /* Removed saturate and reduced darkness */
+}
+
+
+.hero-section {
+  position: relative;
+  height: 100vh;
+  background: linear-gradient(180deg, rgba(0,0,0,.65), rgba(0,0,0,.80)),
+              url('assets/hero.jpg') center/cover no-repeat fixed;
+  z-index: 1;
+}
+
+.map-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+  z-index: -1;
+}
+
+.scroll-progress-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.scroll-progress-path {
+    position: absolute;
+    left: 0;
+    bottom: 25px; /* Adjusted to be above the bicycle */
+    width: 100%;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.bicycle {
+    position: absolute;
+    left: 0;
+    bottom: -5px; /* Changed from 15px to 0px */
+    transform: translateX(-50%);
+    transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+
+
+.bicycle img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.hero a {
+    pointer-events: all !important;
+    z-index: 1000;
+}
+.hero img {
+    pointer-events: all !important;
+    z-index: 9999;
+}
+
+
+.tree-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    height: 40px;
+}
+
+.tree {
+    position: absolute;
+    bottom: 5px;
+    height: 30px;
+    width: auto;
+    filter: brightness(0.9);
+}
+
+
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+  background-color: transparent; /* Changed from rgba(11, 16, 32, 0.6) */
+}
+
+
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 420px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.3)), /* Reduced overlay opacity */
+    url('assets/hero.jpg') center/cover no-repeat fixed;
+  color: #fff;
+  overflow: hidden;
+}
+
+.hero {
+    pointer-events: auto !important;
+}
+
+
+.hero a:hover img {
+    opacity: 0.8;
+}
+
+.hero a {
+    pointer-events: all !important;
+    z-index: 9999;
+}
+
+
+.particles {
+    pointer-events: none !important;
+}
+.particle {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: float 15s infinite;
+}
+@keyframes float {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  50% { opacity: 0.5; }
+  100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+}
+
+.title{
+  font-family:Montserrat, sans-serif; 
+  font-weight:800; 
+  font-size:clamp(32px,6vw,56px); 
+  letter-spacing:.5px; 
+  margin:0 16px;
+  position: relative;
+  z-index: 2;
+  color: #00ff00; /* Bright green */
+  /* or */
+  color: #ff1493; /* Bright pink */
+  /* or */
+  color: #00ffff; /* Bright cyan */
+}
+
+.subtitle{
+  opacity:.9; 
+  margin:14px 16px 0; 
+  font-size:clamp(15px,2.5vw,20px);
+  position: relative;
+  z-index: 2;
+}
+
+.cta{
+  margin-top:22px; 
+  display:inline-block; 
+  padding:14px 28px; 
+  border-radius:25px;
+  background:var(--gradient); 
+  color:#fff; 
+  text-decoration:none; 
+  font-weight:600;
+  box-shadow:0 10px 24px rgba(0,0,0,.25);
+  transition:all .3s ease;
+  position: relative;
+  z-index: 2;
+}
+.cta:hover{ 
+  transform:translateY(-3px); 
+  box-shadow:0 14px 28px rgba(0,0,0,.35);
+  background: linear-gradient(120deg, #005bb7, #0072CE);
+}
+
+.cta-secondary{
+  border:2px solid rgba(255,255,255,0.8);
+}
+.cta-secondary:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.stats-container {
+  background: rgba(26, 31, 53, 0.4); /* Reduced opacity */
+  backdrop-filter: blur(5px); /* Reduced blur */
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  padding: 40px 20px;
+}
+
+
+
+.stat-item {
+  text-align: center;
+  color: #fff;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #333333;  /* Changed from var(--accent) to dark grey */
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+
+.logo-container {
+    position: relative;
+    z-index: 100;
+    margin-top: 20px;
+}
+
+.logo-container a {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.logo-container img {
+    height: 40px;
+    width: auto;
+    transition: opacity 0.3s ease;
+}
+
+.logo-container img:hover {
+    opacity: 0.7;
+}
+
+
+.chart-container {
+  background: rgba(26, 31, 53, 0.4); /* Reduced opacity */
+  border-radius: 16px;
+  backdrop-filter: blur(5px); /* Reduced blur */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.chart-container:hover {
+  transform: translateY(-5px);
+}
+
+.chart-title {
+  padding: 20px;
+  margin: 0;
+  color: #fff;
+  font-size: 1.1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(26, 31, 53, 0.8);
+  border-radius: 16px 16px 0 0;
+}
+
+/* Enhanced Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b1020;
+  border-radius: 10px;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #333333, #444444);
+  border-radius: 10px;
+  border: 2px solid #0b1020;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(45deg, #444444, #555555);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+}
+</style>
+</head>
+<body>
+<div class="parallax-container" id="parallax-container">
+</div>
+
+<div class="content-wrapper">
+<header class="hero">
+<div class="particles" id="particles"></div>
+<div data-aos="fade-up" data-aos-duration="1000">
+<div class="badge" style="color: #00fff2;">2013 – 2025</div>
+<h1 class="title" style="color: #00fff2;">NYC Citi Bike Dashboard</h1>
+<p class="subtitle" style="color: #00fff2;">Beautiful, data-driven insights into how New Yorkers move.</p>
+
+<!-- Enhanced clickable logo code -->
+<div style="margin-top: 30px; position: relative; z-index: 9999;">
+    <a href="https://citibikenyc.com/" 
+       target="_blank" 
+       onclick="window.open('https://citibikenyc.com/', '_blank')"
+       style="display: inline-block; cursor: pointer; text-decoration: none; pointer-events: all;">
+        <img src="assets/citibikelogo.png" 
+             alt="Citi Bike Logo" 
+             style="height: 40px; width: auto; transition: opacity 0.3s ease; pointer-events: all;"
+             onmouseover="this.style.opacity='0.7'"
+             onmouseout="this.style.opacity='1'">
+    </a>
+</div>
+
+     
+    <div>
+</header>
+
+<section id="stats" class="stats-container">
+  <div class="stat-item" data-aos="fade-up" data-aos-delay="100">
+    <div class="stat-number" id="stations-count" style="color: #00fff2;">5,000+</div>
+    <div class="stat-label" style="color: #00fff2; opacity: 1;">Stations</div>
+  </div>
+  <div class="stat-item" data-aos="fade-up" data-aos-delay="200">
+    <div class="stat-number" id="rides-count" style="color: #00fff2;">267MM+</div>
+    <div class="stat-label" style="color: #00fff2; opacity: 1;">Annual Rides</div>
+  </div>
+  <div class="stat-item" data-aos="fade-up" data-aos-delay="300">
+    <div class="stat-number" id="members-count" style="color: #00fff2;">131k+</div>
+    <div class="stat-label" style="color: #00fff2; opacity: 1;">Members</div>
+  </div>
+  <div class="stat-item" data-aos="fade-up" data-aos-delay="400">
+    <div class="stat-number" id="miles-count" style="color: #00fff2;">685</div>
+    <div class="stat-label" style="color: #00fff2; opacity: 1;">Miles/Year per Member</div>
+  </div>
+  <div class="stat-item" data-aos="fade-up" data-aos-delay="500">
+    <div class="stat-number" id="growth-rate" style="color: #00fff2;">25%</div>
+    <div class="stat-label" style="color: #00fff2; opacity: 1;">YoY Ride Growth</div>
+  </div>
+</section>
+
+
+
+
+
+
+<main id="dashboard" style="width: 100%; max-width: 100%; padding: 0; margin-top: 200px;"> <!-- Added margin-top: 80px -->
+<h2 style="font-family:Montserrat; font-weight:500; margin:40px 0 20px; padding: 0 18px; color:#FFFFFF; text-align:center; font-size:0.9rem; max-width:500px; margin-left:auto; margin-right:auto; line-height:1.6;" data-aos="fade-up">
+    NYC's Citi Bike stations are most densely concentrated in Manhattan compared to other boroughs. This is largely due to Manhattan's high population density, significant commuter traffic, and major commercial and tourist hubs. The extensive network of stations in areas like Midtown, Downtown, and the Upper West and East Sides ensures easy accessibility and supports the heavy demand for short-distance travel. While Citi Bike has expanded into Brooklyn, Queens, and the Bronx, the coverage in these boroughs remains less dense, making Manhattan the central focus of the bike-sharing system
+</h2>
+  
+  <div style="width: 100%; height:700px; margin-bottom:200px;" data-aos="fade-up"> <!-- Increased margin-bottom from 24px to 80px -->
+      <iframe src="charts/station_map1.html" style="width:100%; height:100%; border:none; display: block;"></iframe>
+  </div>
+
+
+<h2 style="font-family:Montserrat; font-weight:500; margin:40px 0 20px; padding: 0 18px; color:#FFFFFF; text-align:center; font-size:0.9rem; max-width:500px; margin-left:auto; margin-right:auto; line-height:1.6;" data-aos="fade-up">
+    In recent years, Citi Bike has extended its footprint well beyond Manhattan, significantly expanding into underserved neighborhoods across Queens, Brooklyn, and the Bronx. These efforts reflect the city's broader push to make micromobility equitable and efficient for residents in all boroughs.
+</h2>
+
+
+  <div style="width: 100%; height:700px; margin-bottom:200x;" data-aos="fade-up">
+      <iframe src="charts/station_changes_map2.html" style="width:100%; height:100%; border:none; display: block;"></iframe>
+  </div>
+
+  <h2 style="font-family:Montserrat; font-weight:500; margin:200px 0 20px; padding: 0 18px; color:#FFFFFF; text-align:center; font-size:0.9rem; max-width:500px; margin-left:auto; margin-right:auto; line-height:1.6;" data-aos="fade-up">
+    The most frequently traveled Citi Bike routes reveal distinct patterns in how New Yorkers use the bike-sharing system. Popular routes often connect major transit hubs, commercial districts, and residential areas, with particularly heavy traffic between Manhattan's key subway stations and business centers. Central Park's perimeter stations see significant activity, highlighting the bike share's dual role in both commuting and recreation
+</h2>
+
+
+  <div style="width: 100%; height:700px; margin-bottom:100px;" data-aos="fade-up">
+      <iframe src="charts/top_routes_map7.html" style="width:100%; height:100%; border:none; display: block;"></iframe>
+  </div>
+
+<div style="display: flex; align-items: flex-start; margin-bottom: 70px; position: relative;" data-aos="fade-up">
+    <div style="flex: 1; height: 700px;">
+        <iframe src="charts/bike_trips_chord4.html" style="width:100%; height:100%; border:none; display: block;"></iframe>
+    </div>
+    <h2 style="position: absolute; left: 920px; top: 85px; width: 300px; font-family:Montserrat; font-weight:500; color:#FFFFFF; text-align:left; font-size:0.9rem; line-height:1.6;">
+        Major pairs of routes are located in Manhattan, particularly around Midtown and Downtown, where the highest volume of trips occurs. The chord diagram reveals strong connections between popular stations, highlighting key commuting and leisure travel patterns.
+    </h2>
+</div>
+
+
+
+
+  
+
+<div style="display: flex; align-items: flex-start; margin-bottom: 70px; position: relative;" data-aos="fade-up">
+    <div style="flex: 1; height: 700px;">
+        <iframe src="charts/rides_stations_trend_2020_2025.html" style="width:100%; height:100%; border:none; display: block;"></iframe>
+    </div>
+    <h2 style="position: absolute; left: 920px; top: 85px; width: 300px; font-family:Montserrat; font-weight:500; color:#FFFFFF; text-align:left; font-size:0.9rem; line-height:1.6;">
+        Station growth and ridership show strong correlation, with expansion into new neighborhoods driving increased system usage. The steady upward trend reflects successful implementation of expansion plans and growing adoption of bike-sharing across the city.
+    </h2>
+</div>
+
+
+
+<div style="display: flex; align-items: flex-start; margin-bottom: 70px; position: relative;" data-aos="fade-up">
+    <div style="flex: 1; height: 700px;">
+        <iframe src="charts/rides_forecast_2years_daily.html" style="width:100%; height:100%; border:none; display: block;"></iframe>
+    </div>
+    <h2 style="position: absolute; left: 920px; top: 85px; width: 300px; font-family:Montserrat; font-weight:500; color:#FFFFFF; text-align:left; font-size:0.9rem; line-height:1.6;">
+        Daily ridership forecasts reveal consistent growth patterns with pronounced seasonal variations. The Prophet forecast model predicts increasing peak usage during summer months while maintaining steady baseline growth
+    </h2>
+</div>
+
+<div style="display: flex; align-items: flex-start; margin-bottom: 70px; position: relative;" data-aos="fade-up">
+    <div style="flex: 1; height: 700px;">
+        <iframe src="charts/yearly_member_rides_2020_2025.html" style="width:100%; height:100%; border:none; display: block;"></iframe>
+    </div>
+    <h2 style="position: absolute; left: 920px; top: 85px; width: 300px; font-family:Montserrat; font-weight:500; color:#FFFFFF; text-align:left; font-size:0.9rem; line-height:1.6;">
+        Annual membership rides demonstrate robust year-over-year growth, highlighting increasing reliance on Citi Bike for regular transportation. The consistent upward trend suggests strong user retention and growing adoption among New York residents.
+    </h2>
+</div>
+
+<div style="display: flex; align-items: flex-start; margin-bottom: 70px; position: relative;" data-aos="fade-up">
+    <div style="flex: 1; height: 700px;">
+        <iframe src="charts/monthly_member_rides_2024.html" style="width:100%; height:100%; border:none; display: block;"></iframe>
+    </div>
+    <h2 style="position: absolute; left: 920px; top: 85px; width: 300px; font-family:Montserrat; font-weight:500; color:#FFFFFF; text-align:left; font-size:0.9rem; line-height:1.6;">
+        Monthly usage patterns in 2024 showcase clear seasonal trends with peak activity during summer months where casual riders show an increase in usage. The data indicates sustained ridership even during colder periods, reflecting the system's role as a reliable year-round transportation option
+    </h2>
+</div>
+
+<div style="display: flex; align-items: flex-start; margin-bottom: 70px; position: relative;" data-aos="fade-up">
+    <div style="flex: 1; height: 700px;">
+        <iframe src="charts/hourly_distribution.html" style="width:100%; height:100%; border:none; display: block;"></iframe>
+    </div>
+    <h2 style="position: absolute; left: 920px; top: 85px; width: 300px; font-family:Montserrat; font-weight:500; color:#FFFFFF; text-align:left; font-size:0.9rem; line-height:1.6;">
+        Hourly ride distribution reveals distinct commuting patterns with prominent morning and evening peaks
+    </h2>
+</div>
+
+<div style="display: flex; align-items: flex-start; margin-bottom: 70px; position: relative;" data-aos="fade-up">
+    <div style="flex: 1; height: 700px;">
+        <iframe src="charts/yearly_bike_type_rides_2020_2025.html" style="width:100%; height:100%; border:none; display: block;"></iframe>
+    </div>
+    <h2 style="position: absolute; left: 920px; top: 85px; width: 300px; font-family:Montserrat; font-weight:500; color:#FFFFFF; text-align:left; font-size:0.9rem; line-height:1.6;">
+        The distribution between classic and electric bikes shows evolving user preferences where E-bikes are gaining increasing popularity
+    </h2>
+</div>
+
+
+
+<div style="display: flex; align-items: flex-start; margin-bottom: 70px; position: relative;" data-aos="fade-up">
+    <div style="flex: 1; height: 700px;">
+        <iframe src="charts/hourly_by_day_radial.html" style="width:100%; height:100%; border:none; display: block;"></iframe>
+    </div>
+    <h2 style="position: absolute; left: 920px; top: 85px; width: 300px; font-family:Montserrat; font-weight:500; color:#FFFFFF; text-align:left; font-size:0.9rem; line-height:1.6;">
+        The radial visualization highlights daily usage patterns across different days of the week. Weekday peaks align with commuting hours, while weekends show more distributed activity
+    </h2>
+</div>
+
+<div style="display: flex; align-items: flex-start; margin-bottom: 70px; position: relative;" data-aos="fade-up">
+    <div style="flex: 1; height: 700px;">
+        <iframe src="charts/hourly_by_month_radial.html" style="width:100%; height:100%; border:none; display: block;"></iframe>
+    </div>
+    <h2 style="position: absolute; left: 920px; top: 85px; width: 300px; font-family:Montserrat; font-weight:500; color:#FFFFFF; text-align:left; font-size:0.9rem; line-height:1.6;">
+        Monthly hourly patterns demonstrate how daylight and weather influence riding behavior throughout the year. Summer months show extended evening activity, while winter months see concentrated usage during daylight hours.
+    </h2>
+</div>
+
+
+<div style="display: flex; align-items: flex-start; margin-bottom: 70px; position: relative;" data-aos="fade-up">
+    <div style="flex: 1; height: 700px;">
+        <iframe src="charts/yearly_gender_rides_2013_2019.html" style="width:100%; height:100%; border:none; display: block;"></iframe>
+    </div>
+    <h2 style="position: absolute; left: 920px; top: 85px; width: 300px; font-family:Montserrat; font-weight:500; color:#FFFFFF; text-align:left; font-size:0.9rem; line-height:1.6;">
+        Gender distribution trends from 2013 to 2019 show gradual progress in rider diversity. While disparities persist, ongoing initiatives aim to make the system more inclusive and accessible to all demographics.
+    </h2>
+</div>
+
+<div style="display: flex; align-items: flex-start; margin-bottom: 70px; position: relative;" data-aos="fade-up">
+    <div style="flex: 1; height: 700px;">
+        <iframe src="charts/age_gender_distribution_2019.html" style="width:100%; height:100%; border:none; display: block;"></iframe>
+    </div>
+    <h2 style="position: absolute; left: 920px; top: 85px; width: 300px; font-family:Montserrat; font-weight:500; color:#FFFFFF; text-align:left; font-size:0.9rem; line-height:1.6;">
+        Age and gender analysis reveals usage patterns across different demographic groups. The data suggests strong adoption among working-age adults, with opportunities to expand engagement across other age segments.
+    </h2>
+</div>
+
+<div style="display: flex; align-items: flex-start; margin-bottom: 70px; position: relative;" data-aos="fade-up">
+    <div style="flex: 1; height: 700px;">
+        <iframe src="charts/speed_gender_distribution_2019.html" style="width:100%; height:100%; border:none; display: block;"></iframe>
+    </div>
+    <h2 style="position: absolute; left: 920px; top: 85px; width: 300px; font-family:Montserrat; font-weight:500; color:#FFFFFF; text-align:left; font-size:0.9rem; line-height:1.6;">
+        A higher proportion of Men riders tend to drive at 10+ km/hour than Women riders 
+    </h2>
+</div>
+
+
+  </div>
+</main>
+
+<footer class="container" style="opacity:.7; font-size:14px; text-align:center; padding:40px 20px;">
+    <!-- Title -->
+    <p style="color: #ffffff; font-size: 16px; margin-bottom: 15px; font-family: Montserrat; font-weight: 500;">Powered by</p>
+    
+    <!-- Technology stack -->
+    <div style="margin-bottom: 30px; display: flex; justify-content: center; align-items: center; gap: 30px;">
+        <!-- Python -->
+        <a href="https://www.python.org" target="_blank" style="text-decoration: none;">
+            <i class="fab fa-python" style="font-size: 28px; color: #306998;"></i>
+        </a>
+        <!-- Plotly -->
+        <a href="https://plotly.com" target="_blank" style="text-decoration: none;">
+            <span style="color: #3F4F75; font-weight: bold; font-size: 20px;">Plotly</span>
+        </a>
+        <!-- Pandas -->
+        <a href="https://pandas.pydata.org" target="_blank" style="text-decoration: none;">
+            <span style="color: #150458; font-weight: bold; font-size: 20px;">pandas</span>
+        </a>
+        <!-- HTML -->
+        <a href="https://developer.mozilla.org/en-US/docs/Web/HTML" target="_blank" style="text-decoration: none;">
+            <i class="fab fa-html5" style="font-size: 28px; color: #E34F26;"></i>
+        </a>
+        <!-- CSS -->
+        <a href="https://developer.mozilla.org/en-US/docs/Web/CSS" target="_blank" style="text-decoration: none;">
+            <i class="fab fa-css3-alt" style="font-size: 28px; color: #1572B6;"></i>
+        </a>
+        <!-- JavaScript -->
+        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" style="text-decoration: none;">
+            <i class="fab fa-js" style="font-size: 28px; color: #F7DF1E;"></i>
+        </a>
+        <!-- GitHub -->
+        <a href="https://github.com/rprithvii" target="_blank" style="text-decoration: none;">
+            <i class="fab fa-github" style="font-size: 28px; color: #ffffff; transition: color 0.3s;"></i>
+        </a>
+    </div>
+    
+    <!-- Heart logo with more visible color -->
+    <p style="margin-top: 20px; color: #00fff2; font-size: 16px; font-weight: 500;">Built with 💙 for New York City's cyclists</p>
+</footer>
+
+
+
+
+</div>
+
+<div class="scroll-progress-container">
+    <!-- Trees container -->
+    <div class="tree-line">
+        <!-- First row (larger trees) -->
+        <img src="assets/tree1.png" class="tree" style="left: 3%; height: 35px;">
+        <img src="assets/tree6.png" class="tree" style="left: 12%; height: 40px;">
+        <img src="assets/tree3.png" class="tree" style="left: 21%; height: 35px;">
+        <img src="assets/tree4.png" class="tree" style="left: 30%; height: 38px;">
+        <img src="assets/tree2.png" class="tree" style="left: 39%; height: 35px;">
+        <img src="assets/tree3.png" class="tree" style="left: 48%; height: 40px;">
+        <img src="assets/tree1.png" class="tree" style="left: 57%; height: 35px;">
+        <img src="assets/tree4.png" class="tree" style="left: 66%; height: 38px;">
+        <img src="assets/tree3.png" class="tree" style="left: 75%; height: 35px;">
+        <img src="assets/tree1.png" class="tree" style="left: 84%; height: 40px;">
+        <img src="assets/tree2.png" class="tree" style="left: 93%; height: 35px;">
+
+        <img src="assets/tree4.png" class="tree" style="left: 5%; height: 38px;">
+        <img src="assets/tree2.png" class="tree" style="left: 25%; height: 35px;">
+        <img src="assets/tree3.png" class="tree" style="left: 50%; height: 40px;">
+        <img src="assets/tree1.png" class="tree" style="left: 60%; height: 35px;">
+        <img src="assets/tree4.png" class="tree" style="left: 70%; height: 38px;">
+        
+        <!-- Second row (smaller trees) -->
+        <img src="assets/tree3.png" class="tree" style="left: 7%; height: 25px; opacity: 0.8;">
+        <img src="assets/tree1.png" class="tree" style="left: 16%; height: 28px; opacity: 0.8;">
+        <img src="assets/tree2.png" class="tree" style="left: 25%; height: 25px; opacity: 0.8;">
+        <img src="assets/tree5.png" class="tree" style="left: 34%; height: 28px; opacity: 0.8;">
+        <img src="assets/tree1.png" class="tree" style="left: 43%; height: 25px; opacity: 0.8;">
+        <img src="assets/tree2.png" class="tree" style="left: 52%; height: 28px; opacity: 0.8;">
+        <img src="assets/tree3.png" class="tree" style="left: 61%; height: 25px; opacity: 0.8;">
+        <img src="assets/tree6.png" class="tree" style="left: 70%; height: 28px; opacity: 0.8;">
+        <img src="assets/tree2.png" class="tree" style="left: 79%; height: 25px; opacity: 0.8;">
+        <img src="assets/tree3.png" class="tree" style="left: 88%; height: 28px; opacity: 0.8;">
+        <img src="assets/tree1.png" class="tree" style="left: 97%; height: 25px; opacity: 0.8;">
+
+        <img src="assets/tree3.png" class="tree" style="left: 20%; height: 25px; opacity: 0.8;">
+        <img src="assets/tree6.png" class="tree" style="left: 38%; height: 28px; opacity: 0.8;">
+        <img src="assets/tree2.png" class="tree" style="left: 72%; height: 25px; opacity: 0.8;">
+        <img src="assets/tree3.png" class="tree" style="left: 80%; height: 28px; opacity: 0.8;">
+
+    </div>
+    <div class="scroll-progress-path"></div>
+    <div class="bicycle">
+        <span class="material-icons" style="color: #0be829; font-size: 45px;">
+            directions_bike
+        </span>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+AOS.init();
+
+function createParticles() {
+  const particlesContainer = document.getElementById('particles');
+  for(let i = 0; i < 50; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.top = Math.random() * 100 + '%';
+    particle.style.width = Math.random() * 3 + 'px';
+    particle.style.height = particle.style.width;
+    particle.style.animationDelay = Math.random() * 15 + 's';
+    particlesContainer.appendChild(particle);
+  }
+}
+createParticles();
+
+function animateValue(id, start, end, duration, suffix = '+') {
+  const obj = document.getElementById(id);
+  const range = end - start;
+  const increment = end > start ? 1 : -1;
+  const stepTime = Math.abs(Math.floor(duration / range));
+  let current = start;
+  const timer = setInterval(() => {
+    current += increment;
+    obj.innerHTML = current + suffix;
+    if (current == end) {
+      clearInterval(timer);
+    }
+  }, stepTime);
+}
+
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      animateValue("stations-count", 1000, 5000, 2000);
+      document.getElementById("rides-count").innerHTML = "267MM+";
+      document.getElementById("members-count").innerHTML = "131k+";
+      animateValue("miles-count", 0, 685, 2000);
+      animateValue("growth-rate", 0, 25, 2000, '%');
+      observer.unobserve(entry.target);
+    }
+  });
+});
+
+
+
+
+observer.observe(document.querySelector('.stats-container'));
+const parallaxContainer = document.getElementById('parallax-container');
+// Replace this section in the JavaScript part:
+const parallaxImages = [
+  'assets/NY5.jpg',
+  'assets/NY17.jpg',
+  'assets/NY17.jpg',
+  'assets/NY17.jpg',
+  'assets/NY17.jpg',
+  'assets/NY17.jpg',
+  'assets/NY4.jpg',
+  'assets/NY4.jpg',
+  'assets/NY4.jpg',
+  'assets/NY16.jpg',
+  'assets/NY16.jpg',
+  'assets/NY1.jpg',
+  'assets/NY1.jpg',
+  'assets/NY5.jpg',
+  'assets/NY5.jpg',
+  'assets/NY5.jpg',
+];
+
+function createParallaxImages() {
+  parallaxImages.forEach((url, index) => {
+    const img = document.createElement('div');
+    img.className = 'parallax-image';
+    img.style.backgroundImage = `linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.3)), url(${url})`; // Reduced overlay opacity
+    img.style.opacity = index === 0 ? 1 : 0;
+    parallaxContainer.appendChild(img);
+  });
+}
+
+
+
+function updateParallax() {
+  const scrollPosition = window.pageYOffset;
+  const windowHeight = window.innerHeight;
+  const docHeight = document.documentElement.scrollHeight;
+  const totalScrollable = docHeight - windowHeight;
+  const scrollPercentage = scrollPosition / totalScrollable;
+
+  const imageIndex = Math.floor(scrollPercentage * parallaxImages.length);
+  const images = document.querySelectorAll('.parallax-image');
+
+  images.forEach((img, index) => {
+    if (index === imageIndex) {
+      img.style.opacity = 1;
+    } else {
+      img.style.opacity = 0;
+    }
+  });
+}
+
+createParallaxImages();
+window.addEventListener('scroll', updateParallax);
+window.addEventListener('resize', updateParallax);
+
+let lastKnownScrollPosition = 0;
+let ticking = false;
+
+function updateScrollProgress() {
+  lastKnownScrollPosition = window.pageYOffset;
+  if (!ticking) {
+    window.requestAnimationFrame(() => {
+      const windowHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+      const totalScrollable = docHeight - windowHeight;
+      const scrollPercentage = (lastKnownScrollPosition / totalScrollable) * 100;
+
+      const bicycle = document.querySelector('.bicycle');
+      bicycle.style.left = `${scrollPercentage}%`;
+
+      ticking = false;
+    });
+    ticking = true;
+  }
+}
+
+
+window.addEventListener('scroll', updateScrollProgress, { passive: true });
+window.addEventListener('resize', updateScrollProgress, { passive: true });
+</script>
+</body>
+</html>
