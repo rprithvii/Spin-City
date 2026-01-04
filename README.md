@@ -18,6 +18,7 @@ The project is built using **Python**, **pandas**, and **data visualization libr
 ---
 
 ## 📂 Folder Structure
+```
 nyc_citi_bike/
 ├── data/ # Contains Citi Bike CSV datasets
 ├── notebooks/ # Jupyter notebooks for exploration
